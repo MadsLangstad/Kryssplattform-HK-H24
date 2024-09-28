@@ -5,26 +5,49 @@ import {
   Pressable,
   FlatList,
   Modal,
+  RefreshControl,
 } from "react-native";
 
 import { useEffect, useState } from "react";
 import { Stack } from "expo-router";
-import { getItemWithSetter, storeData } from "@/utils/local_storage";
+import { getData, getItemWithSetter, storeData } from "@/utils/local_storage";
 import PostForm from "@/components/PostForm";
 import UpsertUser from "@/components/UpsertUser";
-import { addNewPost, getAllPosts } from "@/utils/dummyPostData";
+import { addNewPost, getAllPosts, toggleLike } from "@/utils/dummyPostData";
 import { PostData } from "@/utils/postData";
 import Post from "@/components/Post";
 import Spacer from "@/components/Spacer";
+import { useAuthSession } from "@/providers/authctx";
+import * as postApi from "@/api/postApi";
 
 export default function Index() {
-  const [posts, setPosts] = useState<PostData[]>(getAllPosts());
+  const [posts, setPosts] = useState<PostData[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUpsertUserModalOpen, setIsUpsertUserModalOpen] = useState(false);
-  const [userName, setUserName] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  //const [userName, setUserName] = useState<string | null>(null);
+  const { userNameSession } = useAuthSession();
+
+  // const getPostsFromLocal = async () => {
+  //   const posts = await getData("posts");
+  //   if (posts) {
+  //     setPosts(JSON.parse(posts));
+  //   }
+  // };
+
+  const getPostsFromBackend = async () => {
+    setRefreshing(true);
+    const posts = await postApi.getAllPosts();
+    if (posts) {
+      setPosts(posts);
+    }
+    setRefreshing(false);
+  };
 
   useEffect(() => {
-    getItemWithSetter("user", setUserName);
+    // getItemWithSetter("user", setUserName);
+    // getPostsFromLocal();
+    getPostsFromBackend();
   }, []);
 
   return (
@@ -42,9 +65,11 @@ export default function Index() {
           headerLeft: () => (
             <Pressable
               style={{ paddingLeft: 6 }}
-              onPress={() => setIsUpsertUserModalOpen(true)}
+              onPress={async () => {
+                await postApi.getAllPosts();
+              }}
             >
-              <Text>{userName ? userName : "Profil"}</Text>
+              <Text>{userNameSession}</Text>
             </Pressable>
           ),
         }}
@@ -53,7 +78,7 @@ export default function Index() {
         <UpsertUser
           closeModal={() => setIsUpsertUserModalOpen(false)}
           createUserName={(name) => {
-            setUserName(name);
+            //setUserName(name);
             storeData("user", name);
             setIsUpsertUserModalOpen(false);
           }}
@@ -62,9 +87,8 @@ export default function Index() {
       <Modal visible={isModalOpen} animationType="slide">
         <PostForm
           addNewPost={(post) => {
-            setPosts([post, ...posts]);
-            // Legger innlegget til i globalPosts lista
-            addNewPost(post);
+            // setPosts([post, ...posts]);
+            // storeData("posts", JSON.stringify([post, ...posts]));
             setIsModalOpen(false);
           }}
           closeModal={() => setIsModalOpen(false)}
@@ -79,7 +103,29 @@ export default function Index() {
         ListHeaderComponent={() => <Spacer height={10} />}
         ListFooterComponent={() => <Spacer height={50} />}
         ItemSeparatorComponent={() => <Spacer height={8} />}
-        renderItem={(post) => <Post key={post.index} postData={post.item} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={getPostsFromBackend}
+          />
+        }
+        renderItem={(post) => (
+          <Post
+            key={post.index}
+            postData={post.item}
+            toggleLike={(id) => {
+              const tempPosts = posts.map((tempPost) => {
+                if (tempPost.id === id) {
+                  return { ...tempPost, isLiked: !tempPost.isLiked };
+                }
+                return tempPost;
+              });
+
+              setPosts(tempPosts);
+              storeData("posts", JSON.stringify(tempPosts));
+            }}
+          />
+        )}
       />
     </View>
   );
