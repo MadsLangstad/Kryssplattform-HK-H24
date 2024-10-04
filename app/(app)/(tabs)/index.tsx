@@ -62,16 +62,7 @@ export default function Index() {
               <Text>Nytt innlegg</Text>
             </Pressable>
           ),
-          headerLeft: () => (
-            <Pressable
-              style={{ paddingLeft: 6 }}
-              onPress={async () => {
-                signOut();
-              }}
-            >
-              <Text>{userNameSession}</Text>
-            </Pressable>
-          ),
+          headerLeft: () => <Text>{userNameSession}</Text>,
         }}
       />
       <Modal visible={isUpsertUserModalOpen} animationType="slide">

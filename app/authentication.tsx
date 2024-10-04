@@ -10,7 +10,7 @@ const Authentication = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const [isSignedUp, setIsSignedUp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
 
   const { signIn } = useAuthSession();
 
@@ -24,7 +24,7 @@ const Authentication = () => {
       }}
     >
       <View style={styles.mainContainer}>
-        {isSignedUp && (
+        {isSignUp && (
           <View style={styles.textFieldContainer}>
             <Text style={styles.text}>Brukernavn</Text>
             <TextInput
@@ -55,18 +55,25 @@ const Authentication = () => {
           />
           <Text style={styles.errorText}>{error}</Text>
         </View>
-        <Pressable
-          style={{
-            paddingTop: 10,
-          }}
-          onPress={() => {
-            setIsSignedUp(true);
-          }}
-        >
-          <Text style={{ textDecorationLine: "underline", color: "white" }}>
-            Lag bruker
-          </Text>
-        </Pressable>
+        {!isSignUp && (
+          <Pressable
+            style={{
+              paddingTop: 24,
+            }}
+            onPress={() => {
+              setIsSignUp(true);
+            }}
+          >
+            <Text
+              style={{
+                textDecorationLine: "underline",
+                color: "white",
+              }}
+            >
+              Lag bruker
+            </Text>
+          </Pressable>
+        )}
         <View style={styles.buttonContainer}>
           <Pressable
             style={styles.primaryButton}
@@ -84,12 +91,14 @@ const Authentication = () => {
               }
             }}
           >
-            <Text style={styles.text}>Lag bruker</Text>
+            <Text style={styles.text}>
+              {isSignUp ? "Lag Bruker" : "Logg Inn"}
+            </Text>
           </Pressable>
-          {isSignedUp && (
+          {isSignUp && (
             <Pressable
               style={styles.primaryButton}
-              onPress={() => setIsSignedUp(false)}
+              onPress={() => setIsSignUp(false)}
             >
               <Text style={{ color: "white" }}>Avbryt</Text>
             </Pressable>

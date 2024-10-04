@@ -1,4 +1,5 @@
 import { useAuthSession } from "@/providers/authctx";
+import * as authApi from "@/api/authApi";
 import { clearAll, getItemWithSetter } from "@/utils/local_storage";
 import { Link, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -33,9 +34,7 @@ export default function Profile() {
           <Pressable
             style={styles.alertButton}
             onPress={async () => {
-              signOut();
-
-              // router.push("/authentication");
+              authApi.signOut();
             }}
           >
             <Text style={{ color: "white" }}>Logg ut</Text>

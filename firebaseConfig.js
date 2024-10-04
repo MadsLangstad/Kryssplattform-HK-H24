@@ -21,6 +21,19 @@ const storage = getStorage(app);
 
 export const getStorageRef = (path) => ref(storage, path);
 
+export const createUser = async (email, password) => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    return userCredential;
+  } catch (error) {
+    return error;
+  }
+};
+
 export const getDownloadUrl = async (path) => {
   const url = await getDownloadURL(ref(storage, path));
   return url;
