@@ -18,12 +18,12 @@ export default function postDetails() {
   const { id } = useLocalSearchParams();
   const [post, setPost] = useState<PostData | null>(null);
 
-  const fetchPostData = async () => {
-    const post = await getPostFromLocalById(id as string);
-    if (post) {
-      setPost(post);
-    }
-  };
+  // const fetchPostData = async () => {
+  //   const post = await getPostFromLocalById(id as string);
+  //   if (post) {
+  //     setPost(post);
+  //   }
+  // };
 
   const fetchPostFromBackend = async () => {
     const post = await postApi.getPostById(id as string);
@@ -41,7 +41,29 @@ export default function postDetails() {
     <ScrollView contentContainerStyle={styles.container}>
       <Stack.Screen
         options={{
-          headerTitle: (props) => <Text>PostDetaljer</Text>,
+          headerTitle: (props) => (
+            <Text style={styles.headerTitle}>PostDetaljer</Text>
+          ),
+          headerRight: () => (
+            <Pressable
+              onPress={async () => {
+                await postApi.deletePostById(id as string);
+                router.back();
+              }}
+            >
+              <Text style={styles.deleteText}>Slett innlegg</Text>
+            </Pressable>
+          ),
+          headerBackground: () => {
+            return (
+              <View
+                style={{
+                  backgroundColor: "#0d2136",
+                  height: 100,
+                }}
+              />
+            );
+          },
         }}
       />
       {post ? (
@@ -63,6 +85,10 @@ export default function postDetails() {
           {/* Map section */}
           <View style={styles.mapContainer}>
             <MapView
+              zoomEnabled={false}
+              scrollEnabled={false}
+              rotateEnabled={false}
+              pitchEnabled={false}
               initialRegion={{
                 latitude: post?.postCoordinates?.latitude ?? 0,
                 longitude: post?.postCoordinates?.longitude ?? 0,
@@ -90,7 +116,7 @@ export default function postDetails() {
               height: 50,
             }}
           >
-            <Pressable
+            {/* <Pressable
               style={styles.deleteBtn}
               onPress={() => {
                 postApi.deletePostById(post.id);
@@ -98,7 +124,7 @@ export default function postDetails() {
               }}
             >
               <Text>Delete Post</Text>
-            </Pressable>
+            </Pressable> */}
           </View>
         </>
       ) : (
@@ -113,6 +139,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     alignItems: "center",
     padding: 20,
+    backgroundColor: "#0d2136",
   },
   image: {
     width: "100%",
@@ -126,14 +153,21 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: "bold",
+    color: "#f1f3f4",
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#f1f3f4",
   },
   description: {
     fontSize: 16,
     marginVertical: 8,
+    color: "#f1f3f4",
   },
   hashtags: {
     fontSize: 14,
-    color: "gray",
+    color: "#f1f3f4",
   },
   mapContainer: {
     width: "100%",
@@ -146,11 +180,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-  deleteBtn: {
-    marginTop: 10,
-    padding: 10,
-    width: 100,
-    backgroundColor: "red",
-    borderRadius: 10,
+  deleteText: {
+    color: "white",
   },
 });

@@ -15,6 +15,7 @@ import SelectImageModal from "./SelectImageModal";
 import * as Location from "expo-location";
 import * as postApi from "@/api/postApi";
 import { useAuthSession } from "@/providers/authctx";
+import * as imageAPi from "@/api/imageApi";
 
 interface PostFormProps {
   addNewPost: (post: PostData) => void;
